@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>進捗・会議 統合管理ツール（シンプル版）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <h1>進捗・会議 統合管理ツール</h1>
+      <div class="header-right">
+        <label>
+          デフォルト管理者：
+          <input type="text" id="defaultAdmin" placeholder="例）金子" />
+        </label>
+        <button id="saveDefaultAdminBtn">設定保存</button>
+      </div>
+    </header>
+
+    <!-- タブバー -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-target="mainView">一覧・編集</button>
+      <button class="tab-btn" data-target="controlsView">CSV / 保存</button>
+    </div>
+
+    <main class="app-main">
+      <!-- 一覧・編集ビュー -->
+      <div id="mainView" class="view active main-grid">
+        <!-- 入力フォーム -->
+        <section class="panel form-panel">
+          <h2>入力／編集</h2>
+          <form id="recordForm" onsubmit="return false;">
+            <input type="hidden" id="currentId" />
+
+            <div class="form-row">
+              <label>
+                日付：
+                <input type="date" id="dateInput" />
+              </label>
+              <label>
+                時刻：
+                <input type="time" id="timeInput" />
+              </label>
+              <button type="button" id="nowBtn">Now</button>
+            </div>
+
+            <div class="form-row">
+              <label>
+                区分：
+                <select id="categorySelect">
+                  <option value="教員会議">教員会議</option>
+                  <option value="教室会議">教室会議</option>
+                  <option value="進捗共有">進捗共有</option>
+                  <option value="その他">その他</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                管理者名：
+                <input type="text" id="adminInput" />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                関係者氏名（カンマ区切り）：
+                <input
+                  type="text"
+                  id="membersInput"
+                  placeholder="Aさん,Bさん"
+                />
+              </label>
+            </div>
+
+            <div class="form-row">
+              <label>
+                件名（概要）：
+                <input type="text" id="summaryInput" />
+              </label>
+            </div>
+
+            <!-- 詳細メモを大きく表示する行 -->
+            <div class="form-row detail-row">
+              <label>
+                詳細メモ：
+                <textarea id="detailInput" rows="8"></textarea>
+              </label>
+            </div>
+
+            <div class="form-row buttons">
+              <button type="button" id="clearFormBtn">フォームクリア</button>
+              <button type="button" id="addBtn">新規追加</button>
+              <button type="button" id="updateBtn">選択中を更新</button>
+              <button type="button" id="deleteBtn">選択中を削除</button>
+            </div>
+          </form>
+        </section>
+
+        <!-- 一覧テーブル -->
+        <section class="panel list-panel">
+          <h2>一覧</h2>
+          <div class="table-wrapper">
+            <table id="recordTable">
+              <thead>
+                <tr>
+                  <th class="check-col">
+                    <input type="checkbox" id="selectAll" />
+                  </th>
+                  <th>日付</th>
+                  <th>時刻</th>
+                  <th>区分</th>
+                  <th>管理者</th>
+                  <th>関係者</th>
+                  <th>件名</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- JSで挿入 -->
+              </tbody>
+            </table>
+          </div>
+          <div class="status-bar">
+            <span id="recordCount">0件</span>
+          </div>
+          <div class="list-actions">
+            <button id="multiDeleteBtn">選択した行を削除</button>
+          </div>
+        </section>
+      </div>
+
+      <!-- CSV / 保存ビュー -->
+      <div id="controlsView" class="view">
+        <section class="panel controls">
+          <h2>CSV / 保存 操作</h2>
+          <div class="control-row">
+            <label class="file-input-label">
+              CSVインポート
+              <input type="file" id="csvInput" multiple accept=".csv" />
+            </label>
+            <button id="exportCsvBtn">CSVエクスポート</button>
+          </div>
+          <div class="control-row">
+            <button id="loadLocalBtn">localStorageから読み込み</button>
+            <button id="saveLocalBtn">localStorageに保存</button>
+            <button id="clearLocalBtn">localStorage全消去</button>
+          </div>
+          <p class="small-note">
+            ※
+            ブラウザのlocalStorageに保存されます。別ブラウザや別PCとは共有されません。
+          </p>
+        </section>
+      </div>
+    </main>
+
+    <footer class="app-footer">
+      <small
+        >シンプル版 v0.2 &mdash;
+        ブラウザのlocalStorageとCSVのみを使用（サーバー送信なし）</small
+      >
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
