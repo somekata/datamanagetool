@@ -6,6 +6,7 @@ const STORAGE_KEY = "progressManager_v1";
 
 let records = [];
 let selectedId = null;
+let searchTerm = "";
 
 // ユーティリティ：ゼロ埋め
 const pad2 = n => String(n).padStart(2, "0");
@@ -58,6 +59,7 @@ const recordTableBody = document.querySelector("#recordTable tbody");
 const recordCountSpan = document.getElementById("recordCount");
 const selectAllCheckbox = document.getElementById("selectAll");
 const multiDeleteBtn = document.getElementById("multiDeleteBtn");
+const searchInput = document.getElementById("searchInput");
 
 // -------------------------------
 // localStorage
@@ -268,12 +270,37 @@ function multiDeleteRecords() {
 }
 
 // -------------------------------
+// 検索フィルタ
+// -------------------------------
+function getFilteredRecords() {
+  if (!searchTerm) return [...records];
+
+  const term = searchTerm.toLowerCase();
+
+  return records.filter(r => {
+    const text =
+      (r.datetime || "") +
+      " " +
+      (r.category || "") +
+      " " +
+      (r.admin || "") +
+      " " +
+      (r.members || "") +
+      " " +
+      (r.summary || "") +
+      " " +
+      (r.detail || "");
+    return text.toLowerCase().includes(term);
+  });
+}
+
+// -------------------------------
 // テーブル表示
 // -------------------------------
 
 function renderTable() {
-  // 日時の降順でソート
-  const sorted = [...records].sort((a, b) =>
+  // 検索条件を適用 → 日時の降順でソート
+  const sorted = getFilteredRecords().sort((a, b) =>
     a.datetime < b.datetime ? 1 : -1
   );
 
@@ -333,14 +360,13 @@ function renderTable() {
     recordTableBody.appendChild(tr);
   });
 
-  recordCountSpan.textContent = `${records.length}件`;
+  recordCountSpan.textContent = `${sorted.length}件（全${records.length}件）`;
 }
 
 // -------------------------------
-// CSVエクスポート（全項目をダブルクォート）
+// CSVエクスポート（File System Access API 対応）
 // -------------------------------
-
-function exportCsv() {
+async function exportCsv() {
   if (!records.length) {
     alert("エクスポートするデータがありません。");
     return;
@@ -369,6 +395,37 @@ function exportCsv() {
   });
 
   const csvContent = lines.join("\r\n");
+
+  // File System Access API が使える場合（Chrome, Edge など）
+  if ("showSaveFilePicker" in window) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "progress_records.csv",
+        types: [
+          {
+            description: "CSV ファイル",
+            accept: { "text/csv": [".csv"] }
+          }
+        ]
+      });
+
+      const writable = await handle.createWritable();
+      await writable.write(csvContent);
+      await writable.close();
+      alert("CSVファイルを保存しました。");
+      return;
+    } catch (err) {
+      if (err && err.name === "AbortError") {
+        // ユーザーがキャンセルした場合は何もしない
+        return;
+      }
+      console.error(err);
+      alert("ファイル保存中にエラーが発生しました。通常のダウンロード方式に切り替えます。");
+      // 下の従来方式にフォールバック
+    }
+  }
+
+  // 上記が使えない場合は従来通り「ダウンロード」による保存
   const blob = new Blob([csvContent], {
     type: "text/csv;charset=utf-8;"
   });
@@ -610,7 +667,16 @@ function initEvents() {
   deleteBtn.addEventListener("click", deleteRecord);
   multiDeleteBtn.addEventListener("click", multiDeleteRecords);
 
-  exportCsvBtn.addEventListener("click", exportCsv);
+  // 検索ボックス：入力のたびに絞り込み
+  searchInput.addEventListener("input", e => {
+    searchTerm = e.target.value;
+    renderTable();
+  });
+
+  exportCsvBtn.addEventListener("click", () => {
+    exportCsv();
+  });
+
   csvInput.addEventListener("change", e => {
     handleCsvFiles(e.target.files);
     // 同じファイルを連続で選べるようにリセット

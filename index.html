@@ -102,6 +102,19 @@
         <!-- 一覧テーブル -->
         <section class="panel list-panel">
           <h2>一覧</h2>
+
+          <!-- 検索ボックス -->
+          <div class="search-row">
+            <label>
+              検索：
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="日付, 区分, 管理者, 件名, 詳細 などを検索"
+              />
+            </label>
+          </div>
+
           <div class="table-wrapper">
             <table id="recordTable">
               <thead>
@@ -157,7 +170,7 @@
 
     <footer class="app-footer">
       <small
-        >シンプル版 v0.2 &mdash;
+        >シンプル版 v0.3 &mdash;
         ブラウザのlocalStorageとCSVのみを使用（サーバー送信なし）</small
       >
     </footer>

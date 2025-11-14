@@ -229,6 +229,22 @@ button:active,
   background: #9ca3af;
 }
 
+/* 検索行 */
+
+.search-row {
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+}
+
+.search-row input[type="text"] {
+  width: 260px;
+  max-width: 100%;
+  padding: 0.25rem 0.4rem;
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+  font-size: 0.85rem;
+}
+
 /* テーブル */
 
 .table-wrapper {
