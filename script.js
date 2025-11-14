@@ -8,6 +8,10 @@ let records = [];
 let selectedId = null;
 let searchTerm = "";
 
+// ★ ソート状態を追加
+let sortKey = "datetime"; // "datetime" | "category" | "admin" | "summary"
+let sortDir = "desc";     // "asc" | "desc"
+
 // ユーティリティ：ゼロ埋め
 const pad2 = n => String(n).padStart(2, "0");
 
@@ -295,14 +299,63 @@ function getFilteredRecords() {
 }
 
 // -------------------------------
+// ★ ソート処理
+// -------------------------------
+
+function sortRecords(arr) {
+  const list = [...arr];
+
+  list.sort((a, b) => {
+    let av;
+    let bv;
+
+    if (sortKey === "datetime") {
+      av = a.datetime || "";
+      bv = b.datetime || "";
+    } else if (sortKey === "category") {
+      av = a.category || "";
+      bv = b.category || "";
+    } else if (sortKey === "admin") {
+      av = a.admin || "";
+      bv = b.admin || "";
+    } else if (sortKey === "summary") {
+      av = a.summary || "";
+      bv = b.summary || "";
+    } else {
+      av = "";
+      bv = "";
+    }
+
+    av = av.toString().toLowerCase();
+    bv = bv.toString().toLowerCase();
+
+    if (av < bv) return sortDir === "asc" ? -1 : 1;
+    if (av > bv) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  return list;
+}
+
+function updateSortIndicators() {
+  const ths = document.querySelectorAll("#recordTable th.sortable");
+  ths.forEach(th => {
+    th.classList.remove("sorted-asc", "sorted-desc");
+    const key = th.dataset.sortKey;
+    if (key === sortKey) {
+      th.classList.add(sortDir === "asc" ? "sorted-asc" : "sorted-desc");
+    }
+  });
+}
+
+// -------------------------------
 // テーブル表示
 // -------------------------------
 
 function renderTable() {
-  // 検索条件を適用 → 日時の降順でソート
-  const sorted = getFilteredRecords().sort((a, b) =>
-    a.datetime < b.datetime ? 1 : -1
-  );
+  // 検索 → ソート
+  const filtered = getFilteredRecords();
+  const sorted = sortRecords(filtered);
 
   recordTableBody.innerHTML = "";
   selectAllCheckbox.checked = false;
@@ -361,6 +414,9 @@ function renderTable() {
   });
 
   recordCountSpan.textContent = `${sorted.length}件（全${records.length}件）`;
+
+  // ★ ソート矢印更新
+  updateSortIndicators();
 }
 
 // -------------------------------
@@ -644,6 +700,32 @@ function initTabs() {
 }
 
 // -------------------------------
+// ★ ソート用ヘッダ初期化
+// -------------------------------
+function initSortHeaders() {
+  const sortableHeaders = document.querySelectorAll(
+    "#recordTable th.sortable"
+  );
+  sortableHeaders.forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.dataset.sortKey;
+      if (!key) return;
+
+      if (sortKey === key) {
+        // 同じ列なら昇順⇔降順を反転
+        sortDir = sortDir === "asc" ? "desc" : "asc";
+      } else {
+        // 列を切り替えたらキー変更＋方向を初期化
+        sortKey = key;
+        sortDir = key === "datetime" ? "desc" : "asc"; // 日付だけは新しい順から
+      }
+
+      renderTable();
+    });
+  });
+}
+
+// -------------------------------
 // イベント設定
 // -------------------------------
 
@@ -709,6 +791,7 @@ function initEvents() {
   });
 
   initTabs();
+  initSortHeaders(); // ★ ソートヘッダも初期化
 }
 
 // -------------------------------

@@ -332,6 +332,34 @@ button:active,
   color: #6b7280;
 }
 
+/* ★★ ソート用のスタイルを追加 ★★ */
+
+#recordTable th.sortable {
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+}
+
+#recordTable th.sortable::after {
+  content: "";
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+#recordTable th.sortable.sorted-asc::after {
+  content: "▲";
+  color: #3b82f6;
+}
+
+#recordTable th.sortable.sorted-desc::after {
+  content: "▼";
+  color: #3b82f6;
+}
+
 /* レスポンシブ */
 
 @media (max-width: 900px) {
